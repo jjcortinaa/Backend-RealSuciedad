@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from rest_framework import generics
 from django.db.models import Q
-from .models import Category, Auction
-from .serializers import CategoryListCreateSerializer, CategoryDetailSerializer, AuctionListCreateSerializer, AuctionDetailSerializer
+from .models import Category, Auction, Bid
+from .serializers import CategoryListCreateSerializer, CategoryDetailSerializer, AuctionListCreateSerializer, AuctionDetailSerializer, BidDetailSerializer, BidListCreateSerializer
 # Create your views here.
 
 class CategoryListCreate(generics.ListCreateAPIView):
@@ -47,3 +47,14 @@ class AuctionDetail(generics.RetrieveUpdateDestroyAPIView):
         if self.request.method == "PUT":
             return AuctionDetailSerializer
         return AuctionListCreateSerializer
+    
+class BidListCreate(generics.ListCreateAPIView):
+    queryset = Bid.objects.all()
+    serializer_class = BidListCreateSerializer
+
+class BidDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Bid.objects.all()
+    def get_serializer_class(self):
+        if self.request.method == "PUT":
+            return BidDetailSerializer
+        return BidListCreateSerializer

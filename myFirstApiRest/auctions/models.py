@@ -28,9 +28,12 @@ class Auction(models.Model):
     
 class Bid(models.Model):
     auction = models.ForeignKey(Auction, related_name='bids', on_delete=models.CASCADE)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     creation_date = models.DateTimeField(auto_now_add=True)
     bidder = models.CharField(max_length=255)
+
+    class Meta:
+        ordering=('-price','-creation_date')
 
     def __str__(self):
         return f"{self.bidder} - {self.price}€"
