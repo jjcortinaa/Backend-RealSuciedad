@@ -1,8 +1,12 @@
 from django.shortcuts import render
 from rest_framework import generics
 from django.db.models import Q
+from rest_framework.response import Response
 from .models import Category, Auction
 from .serializers import CategoryListCreateSerializer, CategoryDetailSerializer, AuctionListCreateSerializer, AuctionDetailSerializer
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from .permissions import IsOwnerOrAdmin
 # Create your views here.
 
 class CategoryListCreate(generics.ListCreateAPIView):
@@ -17,6 +21,10 @@ class AuctionListCreate(generics.ListCreateAPIView):
     queryset = Auction.objects.all()
     serializer_class = AuctionListCreateSerializer
 
+class AuctionRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsOwnerOrAdmin] 
+    queryset = Auction.objects.all()
+    serializer_class = AuctionDetailSerializer
 
 class AuctionSearch(generics.ListAPIView):
     serializer_class = AuctionListCreateSerializer
@@ -47,3 +55,11 @@ class AuctionDetail(generics.RetrieveUpdateDestroyAPIView):
         if self.request.method == "PUT":
             return AuctionDetailSerializer
         return AuctionListCreateSerializer
+    
+class UserAuctionListView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        # Obtener las subastas del usuario autenticado
+        user_auctions = Auction.objects.filter(auctioneer=request.user)
+        serializer = AuctionListCreateSerializer(user_auctions, many=True)
+        return Response(serializer.data)

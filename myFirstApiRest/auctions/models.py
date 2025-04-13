@@ -1,7 +1,8 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from users.models import CustomUser 
 
-from django.db import models
+
 class Category(models.Model):
     name = models.CharField(max_length=50, blank=False, unique=True)
 
@@ -22,7 +23,11 @@ class Auction(models.Model):
     rating = models.DecimalField(max_digits=3, decimal_places=2, validators=[MinValueValidator(1), MaxValueValidator(5)])
     brand = models.CharField(max_length=100)
     category = models.ForeignKey(Category, related_name='auctions',on_delete=models.CASCADE, default=0)
-    
+    auctioneer = models.ForeignKey(
+        CustomUser,  # Referencia al modelo CustomUser
+        related_name='auctions',  # Relación inversa en el modelo CustomUser
+        on_delete=models.CASCADE  # Si el usuario es eliminado, se eliminan las subastas
+    )
     def __str__(self):
         return self.title
     
