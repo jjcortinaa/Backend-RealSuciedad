@@ -75,15 +75,18 @@ class BidListCreateSerializer(serializers.ModelSerializer):
     
     def validate(self, data):
         bid = self.instance 
-        auction = bid.auction 
+        auction = data.get("auction")
 
+        if not auction:
+            raise serializers.ValidationError("Debes proporcionar una subasta válida.")
+        
         # Verificar si la subasta está cerrada
         if auction.closed_at:
             if auction.closed_at <= timezone.now():
                 raise serializers.ValidationError("The auction is closed. You cannot update the bid.")
-            
-        if data.get('price', bid.price) <= bid.price:
-            raise serializers.ValidationError("The bid amount must be greater than the previous highest bid.")
+        if bid:
+            if data.get('price', bid.price) <= bid.price:
+                raise serializers.ValidationError("The bid amount must be greater than the previous highest bid.")
 
         return data
 
