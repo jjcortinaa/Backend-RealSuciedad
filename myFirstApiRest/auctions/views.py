@@ -2,8 +2,8 @@ from django.shortcuts import render
 from rest_framework import generics
 from django.db.models import Q
 from rest_framework.response import Response
-from .models import Category, Auction
-from .serializers import CategoryListCreateSerializer, CategoryDetailSerializer, AuctionListCreateSerializer, AuctionDetailSerializer
+from .models import Category, Auction, Bid
+from .serializers import CategoryListCreateSerializer, CategoryDetailSerializer, AuctionListCreateSerializer, AuctionDetailSerializer, BidDetailSerializer, BidListCreateSerializer
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsOwnerOrAdmin
@@ -63,3 +63,14 @@ class UserAuctionListView(APIView):
         user_auctions = Auction.objects.filter(auctioneer=request.user)
         serializer = AuctionListCreateSerializer(user_auctions, many=True)
         return Response(serializer.data)
+    
+class BidListCreate(generics.ListCreateAPIView):
+    queryset = Bid.objects.all()
+    serializer_class = BidListCreateSerializer
+
+class BidDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Bid.objects.all()
+    def get_serializer_class(self):
+        if self.request.method == "PUT":
+            return BidDetailSerializer
+        return BidListCreateSerializer
