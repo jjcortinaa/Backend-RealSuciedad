@@ -71,6 +71,6 @@ class BidListCreate(generics.ListCreateAPIView):
 class BidDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Bid.objects.all()
     def get_serializer_class(self):
-        if self.request.method == "PUT":
+        if self.request.method == "PUT" or self.request.method == "PATCH":
             return BidDetailSerializer
         return BidListCreateSerializer
