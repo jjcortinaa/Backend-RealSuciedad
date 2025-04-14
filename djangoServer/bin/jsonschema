@@ -1,4 +1,4 @@
-#!/Users/JoseJuan/Documents/IMAT_3/DAS/backend-django/Backend-RealSuciedad/djangoServer/bin/python3.12
+#!/Users/JoseJuan/Documents/IMAT_3/DAS/backend/Backend-RealSuciedad/djangoServer/bin/python3.12
 # -*- coding: utf-8 -*-
 import re
 import sys
