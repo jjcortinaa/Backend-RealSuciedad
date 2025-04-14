@@ -18,7 +18,7 @@ class Auction(models.Model):
     closed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)  
     thumbnail = models.URLField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2,validators=[MinValueValidator(1)])
     stock = models.IntegerField(validators=[MinValueValidator(1)])
     rating = models.DecimalField(max_digits=3, decimal_places=2, validators=[MinValueValidator(1), MaxValueValidator(5)])
     brand = models.CharField(max_length=100)

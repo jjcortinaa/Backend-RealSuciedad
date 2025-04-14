@@ -18,20 +18,35 @@ class CategoryDetailSerializer(serializers.ModelSerializer):
 
 class AuctionListCreateSerializer(serializers.ModelSerializer):
     isOpen = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Auction
         fields = '__all__'
 
-    def validate_closing_date(self, value):
-        if value <= timezone.now() + timedelta(days=15):
-            raise serializers.ValidationError("Closing date must be greater than now.")
-        return value
-    
     @extend_schema_field(serializers.BooleanField())
     def get_isOpen(self, obj):
-        if obj.closed_at is None:
-            return True
-        return obj.closed_at > timezone.now()
+        return obj.closed_at is None or obj.closed_at > timezone.now()
+
+    def validate(self, data):
+        # Obtener la fecha de creación (automáticamente añadida si no se pasa explícitamente)
+        creation_date = self.instance.created_at if self.instance else timezone.now()
+
+        closing_date = data.get('closed_at')
+        if closing_date:
+            if closing_date <= creation_date:
+                raise serializers.ValidationError({
+                    'closed_at': 'The closing date cannot be less than or equal to the creation date.'
+                })
+            if closing_date < creation_date + timedelta(days=15):
+                raise serializers.ValidationError({
+                    'closed_at': 'The closing date must be at least 15 days after the creation date.'
+                })
+        else:
+            raise serializers.ValidationError({
+                'closed_at': 'This field is required.'
+            })
+
+        return data
     
 class AuctionDetailSerializer(serializers.ModelSerializer):
     isOpen = serializers.SerializerMethodField(read_only=True)
