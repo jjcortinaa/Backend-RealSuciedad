@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CategoryListCreate, CategoryRetrieveUpdateDestroy, AuctionListCreate, AuctionDetail, AuctionSearch, UserAuctionListView, BidDetail, BidListCreate
+from .views import CategoryListCreate, CategoryRetrieveUpdateDestroy, AuctionListCreate, AuctionDetail, AuctionSearch, UserAuctionListView, BidDetail, AuctionBidListCreate, RatingCreateUpdateView, RatingDeleteView, RatingListView
 
 app_name="auctions"
 urlpatterns = [
@@ -9,6 +9,11 @@ urlpatterns = [
     path('search/', AuctionSearch.as_view(), name='auction-search'),
     path('<int:pk>/', AuctionDetail.as_view(), name='auction-detail'),
     path('users/', UserAuctionListView.as_view(), name='action-from-users'),
-    path('<int:id_auction>/bids/', BidListCreate.as_view(), name='bid-list-create'),
+    # path('<int:id_auction>/bids/', BidListCreate.as_view(), name='bid-list-create'),
     path('<int:id_auction>/bids/<int:pk>', BidDetail.as_view(), name='bid-detail'),
+    path('<int:auction_id>/bids/', AuctionBidListCreate.as_view(), name='auction-bid-list-create'),
+    path('ratings/', RatingCreateUpdateView.as_view(), name='rating-create-update'),
+    path('ratings/<int:pk>/delete/', RatingDeleteView.as_view(), name='rating-delete'),
+    path('ratings/auction/<int:auction_id>/', RatingListView.as_view(), name='ratings-by-auction'),
+
 ]

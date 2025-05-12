@@ -43,3 +43,11 @@ class Bid(models.Model):
 
     def __str__(self):
         return f"{self.bidder} - {self.price}€"
+    
+class Rating(models.Model):
+    value = models.DecimalField(max_digits=3, decimal_places=2, validators=[MinValueValidator(1), MaxValueValidator(5)])
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    auction = models.ForeignKey(Auction, on_delete=models.CASCADE, related_name='ratings')
+
+    class Meta:
+        unique_together = ('auction', 'user') 

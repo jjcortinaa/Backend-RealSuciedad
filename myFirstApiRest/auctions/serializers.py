@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Auction, Category, Bid
+from .models import Auction, Category, Bid, Rating
 from django.utils import timezone
 from datetime import timedelta
 from drf_spectacular.utils import extend_schema_field
@@ -80,6 +80,14 @@ class BidDetailSerializer(serializers.ModelSerializer):
         if auction.closed_at:
             if auction.closed_at <= timezone.now():
                 raise serializers.ValidationError("The auction is closed. You cannot update the bid.")
+        
+        if bid:
+            if data.get('price', bid.price) <= bid.price:
+                raise serializers.ValidationError("La cantidad de la puja debe ser mayor a la puja anterior.")
+        
+        if 'price' in data and data['price'] > auction.price:
+            auction.price = data['price']
+            auction.save()  
 
         return data
     
@@ -89,21 +97,32 @@ class BidListCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
     
     def validate(self, data):
-        bid = self.instance 
+        bid = self.instance
         auction = data.get("auction")
 
-        if not auction:
+        if not auction :
             raise serializers.ValidationError("Debes proporcionar una subasta válida.")
-        
-        # Verificar si la subasta está cerrada
-        if auction.closed_at:
-            if auction.closed_at <= timezone.now():
-                raise serializers.ValidationError("The auction is closed. You cannot update the bid.")
+            
+        if auction.closed_at and auction.closed_at <= timezone.now():
+            raise serializers.ValidationError("La subasta está cerrada. No puedes realizar una puja.")
+
         if bid:
             if data.get('price', bid.price) <= bid.price:
-                raise serializers.ValidationError("The bid amount must be greater than the previous highest bid.")
+                raise serializers.ValidationError("La cantidad de la puja debe ser mayor a la puja anterior.")
+
+        if 'price' in data and data['price'] > auction.price:
+            auction.price = data['price']
+            auction.save()  
 
         return data
 
+class RatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rating
+        fields = ['id', 'auction', 'value']
+
+    def create(self, validated_data):
+        # El user se asigna automáticamente en la vista
+        return Rating.objects.create(**validated_data, user=self.context['request'].user)
 
     
