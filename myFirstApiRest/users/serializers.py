@@ -3,10 +3,10 @@ from .models import CustomUser
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('id', 'username', 'email', 'birth_date', 'municipality','locality', 'password')
+        fields = ('id', 'first_name', 'last_name' ,'username', 'email', 'birth_date', 'municipality','locality', 'password')
         extra_kwargs = {'password': {'write_only': True},}
     def validate_email(self, value):
-        user = self.instance # Solo tiene valor cuando se está actualizando
+        user = self.instance # Solo tiene valor cuando se está actualizando y se iguala al usuario que se quiere actualizar
         if CustomUser.objects.filter(email=value).exclude(pk=user.pk if user else None).exists():
             raise serializers.ValidationError("Email already in used.")
         return value

@@ -4,7 +4,7 @@ from rest_framework import serializers
 from django.db.models import Q
 from rest_framework.response import Response
 from .models import Category, Auction, Bid, Rating
-from .serializers import CategoryListCreateSerializer, CategoryDetailSerializer, AuctionListCreateSerializer, AuctionDetailSerializer, BidDetailSerializer, BidListCreateSerializer, RatingSerializer
+from .serializers import CategoryListCreateSerializer, CategoryDetailSerializer, AuctionListCreateSerializer, AuctionDetailSerializer, BidDetailSerializer, BidListCreateSerializer, RatingListCreateSerializer, RatingRetrieveUpdateDestroySerializer
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsOwnerOrAdmin
@@ -128,16 +128,16 @@ class AuctionBidListCreate(generics.ListCreateAPIView):
         serializer.save(auction=auction)
 
 
-class RatingCreateUpdateView(generics.CreateAPIView):
-    serializer_class = RatingSerializer
+class RatingListCreateView(generics.ListCreateAPIView):
+    serializer_class = RatingListCreateSerializer
     permission_classes = [IsAuthenticated]
+    queryset = Rating.objects.all()
 
     def perform_create(self, serializer):
         auction = serializer.validated_data['auction']
         value = serializer.validated_data['value']
         user = self.request.user
 
-        # Si ya existe, actualiza el rating
         existing_rating = Rating.objects.filter(auction=auction, user=user).first()
         if existing_rating:
             existing_rating.value = value
@@ -145,20 +145,17 @@ class RatingCreateUpdateView(generics.CreateAPIView):
         else:
             serializer.save(user=user)
 
-class RatingDeleteView(generics.DestroyAPIView):
+    def get_queryset(self):
+        return Rating.objects.filter(user=self.request.user)
+
+class RatingRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Rating.objects.all()
+    serializer_class = RatingRetrieveUpdateDestroySerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
         rating = super().get_object()
         if rating.user != self.request.user:
-            raise ValidationError("No puedes eliminar una valoración que no es tuya.")
+            raise ValidationError("No puedes modificar una valoración que no es tuya.")
         return rating
     
-class RatingListView(generics.ListAPIView):
-    serializer_class = RatingSerializer
-
-    def get_queryset(self):
-        auction_id = self.kwargs['auction_id']
-        # Ordena los resultados, por ejemplo, por la fecha de creación (suponiendo que la tengas en el modelo)
-        return Rating.objects.filter(auction_id=auction_id).order_by('id')  # O el campo que desees ordenar

@@ -116,13 +116,20 @@ class BidListCreateSerializer(serializers.ModelSerializer):
 
         return data
 
-class RatingSerializer(serializers.ModelSerializer):
+class RatingListCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rating
-        fields = ['id', 'auction', 'value']
+        fields = ['id', 'auction', 'value', 'user']
 
     def create(self, validated_data):
-        # El user se asigna automáticamente en la vista
-        return Rating.objects.create(**validated_data, user=self.context['request'].user)
+        return Rating.objects.create(**validated_data)
+
+
+class RatingRetrieveUpdateDestroySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rating
+        fields = ['id', 'auction', 'value', 'user']
+        read_only_fields = ['user', 'auction']
+
 
     
