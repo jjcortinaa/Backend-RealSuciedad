@@ -52,7 +52,7 @@ class AuctionDetailSerializer(serializers.ModelSerializer):
     isOpen = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Auction
-        fields = ['title', 'description', 'price', 'category', 'isOpen']
+        fields = ['title', 'description', 'price', 'category', 'isOpen', 'rating']
         read_only_fields = ['created_at', 'updated_at', 'id']
 
     def validate_closing_date(self, value):
@@ -65,6 +65,7 @@ class AuctionDetailSerializer(serializers.ModelSerializer):
         if obj.closed_at is None:
             return True
         return obj.closed_at > timezone.now()
+
     
 class BidDetailSerializer(serializers.ModelSerializer):
     class Meta:

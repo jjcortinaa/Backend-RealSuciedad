@@ -54,7 +54,7 @@ class AuctionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Auction.objects.all()
     
     def get_serializer_class(self):
-        if self.request.method == "PUT":
+        if self.request.method == "PUT" or self.request.method == "PATCH":
             return AuctionDetailSerializer
         return AuctionListCreateSerializer
     
@@ -158,9 +158,12 @@ class RatingRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         return rating
     
 class CommentListCreateView(generics.ListCreateAPIView):
-    queryset = Comment.objects.all()
     serializer_class = CommentListCreateSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly] 
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        auction_id = self.kwargs.get('auction_id')
+        return Comment.objects.filter(auction_id=auction_id)
 
 class CommentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
