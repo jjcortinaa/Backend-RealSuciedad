@@ -51,3 +51,12 @@ class Rating(models.Model):
 
     class Meta:
         unique_together = ('auction', 'user') 
+
+
+class Comment(models.Model):
+    title = models.CharField()
+    text = models.TextField()
+    creation_date = models.DateField()
+    modification_date = models.DateField()
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    auction = models.ForeignKey(Auction,on_delete=models.CASCADE )

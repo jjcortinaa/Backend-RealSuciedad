@@ -3,10 +3,10 @@ from rest_framework import generics
 from rest_framework import serializers
 from django.db.models import Q
 from rest_framework.response import Response
-from .models import Category, Auction, Bid, Rating
-from .serializers import CategoryListCreateSerializer, CategoryDetailSerializer, AuctionListCreateSerializer, AuctionDetailSerializer, BidDetailSerializer, BidListCreateSerializer, RatingListCreateSerializer, RatingRetrieveUpdateDestroySerializer
+from .models import Category, Auction, Bid, Rating, Comment
+from .serializers import CategoryListCreateSerializer, CategoryDetailSerializer, AuctionListCreateSerializer, AuctionDetailSerializer, BidDetailSerializer, BidListCreateSerializer, RatingListCreateSerializer, RatingRetrieveUpdateDestroySerializer, CommentListCreateSerializer, CommentDetailSerializer
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from .permissions import IsOwnerOrAdmin
 from rest_framework.exceptions import NotFound
 # Create your views here.
@@ -146,7 +146,7 @@ class RatingListCreateView(generics.ListCreateAPIView):
             serializer.save(user=user)
 
     def get_queryset(self):
-        return Rating.objects.filter(user=self.request.user)
+        return Rating.objects.all()
 
 class RatingRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Rating.objects.all()
@@ -155,7 +155,17 @@ class RatingRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         rating = super().get_object()
-        if rating.user != self.request.user:
-            raise ValidationError("No puedes modificar una valoración que no es tuya.")
         return rating
+    
+class CommentListCreateView(generics.ListCreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentListCreateSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly] 
+
+class CommentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentDetailSerializer
+    permission_classes = [IsAuthenticated]
+
+
     

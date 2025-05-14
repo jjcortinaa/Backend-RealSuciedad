@@ -10,3 +10,13 @@ class IsOwnerOrAdmin(BasePermission):
             return True
             # Permitir si el usuario es el creador o es administrador
         return obj.auctioneer == request.user or request.user.is_staff
+    
+class IsAuthenticatedOrReadOnly(BasePermission):
+    """
+    Permite ver (GET) a cualquier usuario, pero solo permite crear (POST)
+    si el usuario está autenticado.
+    """
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        return request.user and request.user.is_authenticated
