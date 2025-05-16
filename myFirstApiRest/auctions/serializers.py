@@ -18,6 +18,7 @@ class CategoryDetailSerializer(serializers.ModelSerializer):
 
 class AuctionListCreateSerializer(serializers.ModelSerializer):
     isOpen = serializers.SerializerMethodField(read_only=True)
+    lastCall = serializers.SerializerMethodField()
 
     class Meta:
         model = Auction
@@ -27,26 +28,33 @@ class AuctionListCreateSerializer(serializers.ModelSerializer):
     def get_isOpen(self, obj):
         return obj.closed_at is None or obj.closed_at > timezone.now()
 
-    def validate(self, data):
-        # Obtener la fecha de creación (automáticamente añadida si no se pasa explícitamente)
-        creation_date = self.instance.created_at if self.instance else timezone.now()
+    # def validate(self, data):
+    #     # Obtener la fecha de creación (automáticamente añadida si no se pasa explícitamente)
+    #     creation_date = self.instance.created_at if self.instance else timezone.now()
 
-        closing_date = data.get('closed_at')
-        if closing_date:
-            if closing_date <= creation_date:
-                raise serializers.ValidationError({
-                    'closed_at': 'The closing date cannot be less than or equal to the creation date.'
-                })
-            if closing_date < creation_date + timedelta(days=15):
-                raise serializers.ValidationError({
-                    'closed_at': 'The closing date must be at least 15 days after the creation date.'
-                })
+    #     closing_date = data.get('closed_at')
+    #     if closing_date:
+    #         if closing_date <= creation_date:
+    #             raise serializers.ValidationError({
+    #                 'closed_at': 'The closing date cannot be less than or equal to the creation date.'
+    #             })
+    #         if closing_date < creation_date + timedelta(days=15):
+    #             raise serializers.ValidationError({
+    #                 'closed_at': 'The closing date must be at least 15 days after the creation date.'
+    #             })
+    #     else:
+    #         raise serializers.ValidationError({
+    #             'closed_at': 'This field is required.'
+    #         })
+
+    #     return data
+    def get_lastCall(self,obj):
+        if (obj.closed_at < timezone.now() + timedelta(days=1)) :
+            return True
         else:
-            raise serializers.ValidationError({
-                'closed_at': 'This field is required.'
-            })
+            return False
 
-        return data
+
     
 class AuctionDetailSerializer(serializers.ModelSerializer):
     isOpen = serializers.SerializerMethodField(read_only=True)
@@ -110,7 +118,7 @@ class BidListCreateSerializer(serializers.ModelSerializer):
         if bid:
             if data.get('price', bid.price) <= bid.price:
                 raise serializers.ValidationError("La cantidad de la puja debe ser mayor a la puja anterior.")
-
+        
         if 'price' in data and data['price'] > auction.price:
             auction.price = data['price']
             auction.save()  
